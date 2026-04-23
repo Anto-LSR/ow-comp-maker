@@ -172,7 +172,7 @@ export class TeamViewComponent {
     const prompt = this.getPrompt();
 
     navigator.clipboard.writeText(prompt).then(() => {
-      alert('Prompt copié dans le presse-papier !');
+      alert('Prompt copié dans le presse-papier ! ');
     });
   }
 
