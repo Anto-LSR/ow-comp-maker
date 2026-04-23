@@ -1,0 +1,91 @@
+<div class="form-container">
+  <h2>{{ playerId ? 'Modifier' : 'Ajouter' }} un Joueur</h2>
+
+  <form [formGroup]="playerForm" (ngSubmit)="save()">
+    <div class="form-group">
+      <label for="name">Nom du Joueur</label>
+      <input id="name" formControlName="name" required>
+      @if (playerForm.get('name')?.touched && playerForm.get('name')?.invalid) {
+        <span class="error-message">Le nom est requis</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="preferredRole">Rôle Préféré</label>
+      <select id="preferredRole" formControlName="preferredRole">
+        @for (role of roles; track role) {
+          <option [value]="role">{{role}}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Rôles Secondaires</label>
+      <div class="checkbox-group">
+        @for (role of roles; track role) {
+          <div>
+            <input type="checkbox" [id]="'role-' + role" [checked]="isRoleSelected(role)" (change)="onRoleChange(role, $event)">
+            <label [for]="'role-' + role">{{role}}</label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Héros Mains</label>
+      <div class="selected-heroes-list">
+        @for (hero of selectedMainHeroes(); track hero.id) {
+          <div class="hero-chip">
+            <img [ngSrc]="hero.portraitUrl || 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/v2/heroes/' + hero.id + '/icon.png'" [alt]="hero.name" width="24" height="24">
+            <span>{{ hero.name }}</span>
+          </div>
+        }
+        @if (selectedMainHeroes().length === 0) {
+          <span class="no-selection">Aucun héros sélectionné</span>
+        }
+      </div>
+      <button type="button" class="btn-secondary" (click)="toggleHeroModal('main')">
+        {{ selectedMainHeroes().length > 0 ? 'Modifier la sélection' : 'Sélectionner des héros' }}
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label>Héros Secondaires</label>
+      <div class="selected-heroes-list">
+        @for (hero of selectedSecondaryHeroes(); track hero.id) {
+          <div class="hero-chip">
+            <img [ngSrc]="hero.portraitUrl || 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/v2/heroes/' + hero.id + '/icon.png'" [alt]="hero.name" width="24" height="24">
+            <span>{{ hero.name }}</span>
+          </div>
+        }
+        @if (selectedSecondaryHeroes().length === 0) {
+          <span class="no-selection">Aucun héros sélectionné</span>
+        }
+      </div>
+      <button type="button" class="btn-secondary" (click)="toggleHeroModal('secondary')">
+        {{ selectedSecondaryHeroes().length > 0 ? 'Modifier la sélection' : 'Sélectionner des héros' }}
+      </button>
+    </div>
+
+    @if (showHeroModal()) {
+      <app-hero-selector-modal
+        [title]="modalMode() === 'main' ? 'Sélectionner les héros principaux' : 'Sélectionner les héros secondaires'"
+        [selectedIds]="modalMode() === 'main' ? (playerForm.get('mainHeroIds')?.value || []) : (playerForm.get('secondaryHeroIds')?.value || [])"
+        (selectionChange)="onHeroSelectionChange($event)"
+        (close)="toggleHeroModal()"
+      />
+    }
+
+    <div class="form-group">
+      <label for="notes">Notes</label>
+      <textarea id="notes" formControlName="notes"></textarea>
+    </div>
+
+    <div class="actions">
+      <button type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Enregistrement...' : (playerId ? 'Mettre à jour' : 'Enregistrer') }}
+      </button>
+      <button type="button" routerLink="/players">Annuler</button>
+    </div>
+  </form>
+</div>

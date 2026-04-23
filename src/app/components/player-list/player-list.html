@@ -1,0 +1,21 @@
+<div class="list-container">
+  <div class="header">
+    <h2>Joueurs</h2>
+    <button routerLink="/players/add">Ajouter un Joueur</button>
+  </div>
+
+  <div class="grid">
+    @for (player of players$ | async; track player.id) {
+      <div class="card">
+        <h3>{{ player.name }}</h3>
+        <p><strong>Rôle:</strong> {{ player.preferredRole }}</p>
+        <p><strong>Mains:</strong> {{ getHeroNames(player.mainHeroIds) }}</p>
+        <p><strong>Secondaires:</strong> {{ getHeroNames(player.secondaryHeroIds) }}</p>
+        <div class="actions">
+          <button [routerLink]="['/players/edit', player.id]">Modifier</button>
+          <button (click)="deletePlayer(player.id)" class="delete">Supprimer</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

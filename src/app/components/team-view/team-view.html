@@ -1,0 +1,145 @@
+<div class="team-container">
+  <div class="header-actions">
+    <h2>Composer une Équipe ({{selectedPlayers().length}}/5)</h2>
+    <button class="reset-btn" (click)="reset()">Réinitialiser</button>
+  </div>
+
+  <div class="selection-area">
+    <div class="map-mode-selector">
+      <h3>Mode de jeu</h3>
+      <div class="mode-grid">
+        @for (mode of mapModes; track mode) {
+          <button
+            class="mode-btn"
+            [class.active]="selectedMapMode() === mode"
+            (click)="setMapMode(mode)"
+          >
+            {{ mode }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="side-selector">
+      <h3>Côté</h3>
+      <div class="side-grid">
+        <button
+          class="side-btn attack"
+          [class.active]="selectedSide() === 'Attaque'"
+          (click)="setSide('Attaque')"
+        >
+          Attaque
+        </button>
+        <button
+          class="side-btn defense"
+          [class.active]="selectedSide() === 'Défense'"
+          (click)="setSide('Défense')"
+        >
+          Défense
+        </button>
+      </div>
+    </div>
+
+    <div class="options-selector">
+      <h3>Options</h3>
+      <label class="option-toggle">
+        <input type="checkbox" [checked]="detailedPlaybook()" (change)="toggleDetailedPlaybook()">
+        Plan de jeu détaillé (Platine)
+      </label>
+    </div>
+
+    <div class="counter-selector">
+      <h3>Héros à contrer</h3>
+      <div class="counter-actions">
+        <button class="add-counter-btn" (click)="toggleHeroModal()">
+          <span>+</span> Sélectionner les counters
+        </button>
+      </div>
+      @if (selectedCounters().length > 0) {
+        <div class="selected-counters">
+          @for (hero of selectedCounters(); track hero.id) {
+            <div class="counter-hero-chip">
+              <img [src]="hero.portraitUrl" [alt]="hero.name" width="24" height="24">
+              <span>{{ hero.name }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="player-selection">
+      <h3>Sélectionner les joueurs</h3>
+      <div class="player-grid">
+        @for (player of players$ | async; track player.id) {
+          <div class="player-chip"
+               [class.selected]="isSelected(player)"
+               (click)="toggleSelection(player)">
+            {{ player.name }} ({{ player.preferredRole }})
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (selectedPlayers().length > 0) {
+    <div class="team-preview">
+      <h3>Équipe Actuelle</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Rôle Assigné</th>
+            <th>Main</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of selectedPlayers(); track p.id) {
+            <tr>
+              <td>{{p.name}}</td>
+              <td>
+                <div class="role-selector">
+                  <button class="role-btn tank"
+                          [class.active]="p.assignedRole === 'Tank'"
+                          (click)="setRole(p, 'Tank')"
+                          title="Tank">
+                    🛡️
+                  </button>
+                  <button class="role-btn damage"
+                          [class.active]="p.assignedRole === 'Damage'"
+                          (click)="setRole(p, 'Damage')"
+                          title="Dégâts">
+                    ⚔️
+                  </button>
+                  <button class="role-btn support"
+                          [class.active]="p.assignedRole === 'Support'"
+                          (click)="setRole(p, 'Support')"
+                          title="Support">
+                    ➕
+                  </button>
+                </div>
+              </td>
+              <td>{{getHeroNames(p.mainHeroIds)}}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="actions">
+        <button class="export-btn" (click)="copyJson()">Copier le JSON</button>
+        <button class="export-btn prompt-btn" (click)="copyPrompt()">Copier le Prompt</button>
+        <button class="export-btn gemini-btn" disabled>
+          Analyser avec Groq (Désactivé)
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (showHeroModal()) {
+    <app-hero-selector-modal
+      [selectedIds]="selectedCounterIds()"
+      [title]="'Héros à contrer'"
+      (selectionChange)="onHeroSelectionChange($event)"
+      (close)="toggleHeroModal()"
+    />
+  }
+</div>
